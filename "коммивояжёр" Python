@@ -1,0 +1,134 @@
+1. Полный перебор (Brute Force)
+
+from itertools import permutations
+
+def calculate_distance(route, distance_matrix):
+    return sum(distance_matrix[route[i]][route[i+1]] for i in range(len(route)-1)) + distance_matrix[route[-1]][route[0]]
+
+def brute_force_tsp(distance_matrix):
+    n = len(distance_matrix)
+    cities = list(range(n))
+    min_distance = float('inf')
+    best_route = None
+
+    for perm in permutations(cities):
+        current_distance = calculate_distance(perm, distance_matrix)
+        if current_distance < min_distance:
+            min_distance = current_distance
+            best_route = perm
+
+    return best_route, min_distance
+
+# Пример использования
+distance_matrix = [
+    [0, 10, 15, 20],
+    [10, 0, 35, 25],
+    [15, 35, 0, 30],
+    [20, 25, 30, 0]
+]
+
+route, distance = brute_force_tsp(distance_matrix)
+print("Лучший маршрут:", route)
+print("Кратчайшее расстояние:", distance)
+
+
+2. Динамическое программирование (алгоритм Беллмана-Хелда-Карпа)
+from functools import lru_cache
+
+def tsp_dp(distance_matrix):
+    n = len(distance_matrix)
+    all_visited = (1 << n) - 1  # Все города посещены
+
+    @lru_cache(None)
+    def visit(city, visited):
+        if visited == all_visited:
+            return distance_matrix[city][0]  # Возвращаемся в начальный город
+
+        min_cost = float('inf')
+        for next_city in range(n):
+            if not (visited & (1 << next_city)):  # Если город еще не посещен
+                new_cost = distance_matrix[city][next_city] + visit(next_city, visited | (1 << next_city))
+                min_cost = min(min_cost, new_cost)
+
+        return min_cost
+
+    return visit(0, 1 << 0)
+
+# Пример использования
+distance_matrix = [
+    [0, 10, 15, 20],
+    [10, 0, 35, 25],
+    [15, 35, 0, 30],
+    [20, 25, 30, 0]
+]
+
+print("Кратчайшее расстояние (DP):", tsp_dp(distance_matrix))
+
+
+3. Жадные алгоритмы
+
+def nearest_neighbor_tsp(distance_matrix):
+    n = len(distance_matrix)
+    visited = [False] * n
+    route = [0]  # Начинаем с первого города
+    visited[0] = True
+
+    for _ in range(n - 1):
+        last_city = route[-1]
+        nearest_city = min(
+            [(i, distance_matrix[last_city][i]) for i in range(n) if not visited[i]],
+            key=lambda x: x[1]
+        )[0]
+        route.append(nearest_city)
+        visited[nearest_city] = True
+
+    route.append(0)  # Возвращаемся в начальный город
+    total_distance = sum(distance_matrix[route[i]][route[i+1]] for i in range(n))
+    return route, total_distance
+
+# Пример использования
+route, distance = nearest_neighbor_tsp(distance_matrix)
+print("Жадный маршрут:", route)
+print("Приближённое расстояние:", distance)
+
+
+4. Муравьиный алгоритм (Эвристический)
+
+from ACO import ACO, Graph  # Установите ACO-библиотеку или используйте самописный вариант
+
+distance_matrix = [
+    [0, 10, 15, 20],
+    [10, 0, 35, 25],
+    [15, 35, 0, 30],
+    [20, 25, 30, 0]
+]
+
+aco = ACO(ant_count=10, generations=50, alpha=1.0, beta=2.0, rho=0.5, q=100)
+graph = Graph(distance_matrix)
+path, cost = aco.solve(graph)
+
+print("Муравьиный алгоритм:", path)
+print("Приближённое расстояние:", cost)
+
+
+5. Методы ветвей и границ (Branch and Bound)
+
+import heapq
+
+def branch_and_bound_tsp(distance_matrix):
+    n = len(distance_matrix)
+    min_distance = float('inf')
+    best_route = None
+    def tsp(node, visited, cost, path):
+        nonlocal min_distance, best_route
+        if len(path) == n:
+            cost += distance_matrix[node][0]
+            if cost < min_distance:
+                min_distance = cost
+                best_route = path + [0]
+            return
+        for next_node in range(n):
+            if next_node not in visited:
+                tsp(next_node, visited | {next_node}, cost + distance_matrix[node][next_node], path + [next_node])
+    tsp(0, {0}, 0, [0])
+    return best_route, min_distance
