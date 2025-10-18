@@ -1,0 +1,102 @@
+class Graph {
+  vertices
+  size
+  edges
+
+  constructor(vertices) {
+    this.vertices = vertices
+    this.size = vertices.length
+    this.edges = Array.from({ length: this.size }, () => {
+      return Array(this.size).fill(null)
+    })
+  }
+
+  addEdge(value1, value2, weight) {
+    const row = this.vertices.indexOf(value1)
+    const column = this.vertices.indexOf(value2)
+
+    this.edges[row][column] = weight
+    this.edges[column][row] = weight
+  }
+}
+
+class Route {
+  vertices
+  weight
+
+  constructor(vertices, weight) {
+    this.vertices = vertices
+    this.weight = weight
+  }
+
+  add(vertex, incWeight) {
+    let nextVertices = [...this.vertices]
+    nextVertices.push(vertex)
+    const nextWeight = this.weight + incWeight
+
+    return new Route(nextVertices, nextWeight)
+  }
+}
+
+tsp() {
+    let seen = new Set();
+    let min = null;
+
+    const bruteforce = (i, current) => {
+      seen.add(i);
+
+      if (seen.size === this.size) {
+        const weight = this.edges[i][0];
+        if (weight !== null) {
+          const route = current.add(this.vertices[0], weight);
+          if (min === null || min.weight > route.weight) {
+            min = route;
+          }
+        }
+      } else {
+        for (let j = 0; j < this.edges[i].length; j += 1) {
+          const weight = this.edges[i][j];
+          if (weight !== null && !seen.has(j)) {
+            const route = current.add(this.vertices[j], weight);
+            bruteforce(j, route);
+          }
+        }
+      }
+      seen.delete(i);
+    };
+    bruteforce(0, new Route([this.vertices[0]], 0));
+
+    return min;
+  }
+
+if (seen.size === this.size) {
+    const weight = this.edges[i][0];
+    if (weight !== null) {
+        const route = current.add(this.vertices[0], weight);
+        if (min === null || min.weight > route.weight) {
+            min = route;
+        }
+
+for (let j = 0; j < this.edges[i].length; j++) {
+    const weight = this.edges[i][j];
+    if (weight !== null && !seen.has(j)) {
+        const route = current.add(this.vertices[j], weight);
+        bruteforce(j, route);
+
+const graph = new Graph(['A', 'B', 'C', 'D', 'E'])
+graph.addEdge('A', 'B', 100)
+graph.addEdge('A', 'C', 162)
+graph.addEdge('A', 'D', 162)
+graph.addEdge('A', 'E', 100)
+graph.addEdge('B', 'C', 100)
+graph.addEdge('B', 'D', 162)
+graph.addEdge('B', 'E', 162)
+graph.addEdge('C', 'D', 100)
+graph.addEdge('C', 'E', 162)
+graph.addEdge('D', 'E', 100)
+
+graph.tsp()
+// Route {
+//     vertices: [ 'A', 'B', 'C', 'D', 'E', 'A' ],
+//     weight: 500
+// }
